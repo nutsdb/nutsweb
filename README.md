@@ -1,0 +1,1 @@
+A simple web based nutsdb GUI Admin panel.
