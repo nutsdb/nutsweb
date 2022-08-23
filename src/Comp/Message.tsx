@@ -21,7 +21,7 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
 export interface DialogTitleProps {
   id: string;
   children?: React.ReactNode;
-  onClose: () => void;
+  onClose: (event:any) => void;
 }
 
 const BootstrapDialogTitle = (props: DialogTitleProps) => {
@@ -73,6 +73,9 @@ export default class Message extends React.Component {
 
   render() {
     // @ts-ignore
+    const { children } = this.props;
+    // @ts-ignore
+    const { open } = this.state;
     return (
       <div>
         <Button onClick={this.handleClickOpen}>
@@ -82,12 +85,12 @@ export default class Message extends React.Component {
         <BootstrapDialog
           onClose={this.handleClose}
           aria-labelledby='customized-dialog-title'
-          open={this.state.open}
+          open={open}
         >
 
           <BootstrapDialogTitle id='customized-dialog-title' onClose={(event:MouseEvent)=>{
             return this.handleClose(event);}}>
-            {this.props.children}
+            {children}
           </BootstrapDialogTitle>
           <DialogContent dividers sx={{ m: 25 }}>
             <Typography>
