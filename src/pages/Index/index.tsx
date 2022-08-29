@@ -6,6 +6,8 @@ import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import Divider from '@mui/material/Divider';
+import Alert from '@mui/material/Alert';
+import * as Setting from '../../Setting';
 
 // @ts-ignore
 import VerticalTabs from '/src/Comp/Tab';
@@ -24,8 +26,15 @@ export default class Index extends React.Component {
 
 
   render() {
+    if (!Setting.isLoggedIn()) {
+      setTimeout(() => window.location.href = '/', 1500);
+      return <Alert severity='error' style={{ width: '300px', margin: "auto" }} onClose={() => window.location.href = '/'}>
+        you are not logged in
+      </Alert>;
+    }
+
     return (
-      <Box sx={{ display: 'flex'}}>
+      <Box sx={{ display: 'flex' }}>
         <CssBaseline />
 
         <AppBar
@@ -54,7 +63,7 @@ export default class Index extends React.Component {
 
           <Toolbar>
             <Typography variant='h5' noWrap component='div' sx={{ color: 'gray', flex: '80%' }}>
-              127.0.0.1:8080
+              {`${Setting.IP}:${Setting.Port}`}
             </Typography>
             <Typography variant='h5' noWrap component='div' sx={{ color: 'gray' }}>
               Alias
@@ -75,7 +84,7 @@ export default class Index extends React.Component {
         </Drawer>
         <Box
           component='main'
-          sx={{ flexGrow: 1, bgcolor: 'background.default', p: 3, mt: 10  }}
+          sx={{ flexGrow: 1, bgcolor: 'background.default', p: 3, mt: 10 }}
         >
           {/*添加主要界面*/}
           <Board />
