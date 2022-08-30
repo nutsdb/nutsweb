@@ -96,6 +96,7 @@ interface HeadCell {
 }
 
 //@ts-ignore
+
 const headCells: readonly HeadCell[] = [
   {
     id: 'key',
@@ -110,6 +111,7 @@ const headCells: readonly HeadCell[] = [
     label: 'Length',
   },
   {
+    // @ts-ignore
     id: 'value',
     numeric: false,
     disablePadding: false,
@@ -153,7 +155,9 @@ function EnhancedTableHead(props: EnhancedTableProps) {
           headCells.map((headCell) => (
             <TableCell
               key={headCell.id}
-              align={headCell.numeric || headCell.id === 'value' ? 'right' : 'left'}
+              align={//@ts-ignore
+                headCell.numeric || headCell.id == 'value' ? 'right' : 'left'
+              }
               padding={headCell.disablePadding ? 'none' : 'normal'}
               sortDirection={orderBy === headCell.id ? order : false}
             >

@@ -6,7 +6,6 @@ import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import Divider from '@mui/material/Divider';
-
 // @ts-ignore
 import VerticalTabs from '/src/Comp/Tab';
 import Board from '../../Comp/Board';
@@ -16,16 +15,33 @@ const textSize = {
   fontSize: '20px',
 
 };
+
+export const InfoContext = React.createContext(null);
+
 export default class Index extends React.Component {
   // @ts-ignore
   constructor(props) {
     super(props);
+    this.state = {
+      ip: localStorage.getItem('ip'),
+      port: localStorage.getItem('port'),
+      alias: localStorage.getItem('alias'),
+      token: localStorage.getItem('token'),
+    };
+
+    if(//@ts-ignore
+      this.state.token ===""){
+      window.location.href="/login"
+    }
+
   }
 
-
   render() {
+    // @ts-ignore
+    const { ip, port, alias } = this.state;
+    // @ts-ignore
     return (
-      <Box sx={{ display: 'flex'}}>
+      <Box sx={{ display: 'flex' }}>
         <CssBaseline />
 
         <AppBar
@@ -54,10 +70,10 @@ export default class Index extends React.Component {
 
           <Toolbar>
             <Typography variant='h5' noWrap component='div' sx={{ color: 'gray', flex: '80%' }}>
-              127.0.0.1:8080
+              {ip} : {port}
             </Typography>
             <Typography variant='h5' noWrap component='div' sx={{ color: 'gray' }}>
-              Alias
+              {alias}
             </Typography>
           </Toolbar>
           <Divider />
@@ -69,13 +85,21 @@ export default class Index extends React.Component {
 
 
           <Divider />
-          <VerticalTabs />
+
+          <InfoContext.Provider
+            //@ts-ignore
+            value={this.state} >
+
+            <VerticalTabs />
+          </InfoContext.Provider>
+
           <Divider />
 
         </Drawer>
+
         <Box
           component='main'
-          sx={{ flexGrow: 1, bgcolor: 'background.default', p: 3, mt: 10  }}
+          sx={{ flexGrow: 1, bgcolor: 'background.default', p: 3, mt: 10 }}
         >
           {/*添加主要界面*/}
           <Board />
