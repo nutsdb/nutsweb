@@ -6,6 +6,9 @@ import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import Divider from '@mui/material/Divider';
+import Alert from '@mui/material/Alert';
+import * as Setting from '../../Setting';
+
 // @ts-ignore
 import VerticalTabs from '/src/Comp/Tab';
 import Board from '../../Comp/Board';
@@ -13,7 +16,6 @@ import Board from '../../Comp/Board';
 const drawerWidth = 240;
 const textSize = {
   fontSize: '20px',
-
 };
 
 export const InfoContext = React.createContext(null);
@@ -28,22 +30,23 @@ export default class Index extends React.Component {
       alias: localStorage.getItem('alias'),
       token: localStorage.getItem('token'),
     };
-
-    if(//@ts-ignore
-      this.state.token ===""){
-      window.location.href="/login"
-    }
-
   }
 
   render() {
+
+    if (!Setting.isLoggedIn()) {
+      setTimeout(() => window.location.href = '/', 1500);
+      return <Alert severity='error' style={{ width: '300px', margin: "auto" }} onClose={() => window.location.href = '/'}>
+        you are not logged in
+      </Alert>;
+    }
+
     // @ts-ignore
     const { ip, port, alias } = this.state;
     // @ts-ignore
     return (
       <Box sx={{ display: 'flex' }}>
         <CssBaseline />
-
         <AppBar
           position='fixed'
           sx={{ width: `calc(100% - 600px)`, ml: `600px` }}
@@ -77,26 +80,20 @@ export default class Index extends React.Component {
             </Typography>
           </Toolbar>
           <Divider />
-
           <Typography variant='h5' noWrap component='div'
                       sx={{ mt: 2, mb: 2, ml: 6, textAlign: 'center', color: 'gray' }}>
             Selecting a data structure
           </Typography>
-
-
           <Divider />
 
           <InfoContext.Provider
             //@ts-ignore
             value={this.state} >
-
             <VerticalTabs />
           </InfoContext.Provider>
 
           <Divider />
-
         </Drawer>
-
         <Box
           component='main'
           sx={{ flexGrow: 1, bgcolor: 'background.default', p: 3, mt: 10 }}

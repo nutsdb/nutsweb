@@ -20,7 +20,6 @@ interface TabPanelProps {
 
 let Buckets: any[] = [];
 
-
 function RenderRow(props: ListChildComponentProps) {
   const { index, style } = props;
   return (
