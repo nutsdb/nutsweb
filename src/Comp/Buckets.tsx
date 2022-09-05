@@ -7,7 +7,8 @@ import Box from '@mui/material/Box';
 // @ts-ignore
 import AutoSizer from 'react-virtualized-auto-sizer';
 import axios from 'axios';
-import { InfoContext } from '../pages/Index';
+import { ConditionContext, InfoContext } from '../pages/Index';
+import { BucketsContext} from './Tab';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -16,31 +17,23 @@ interface TabPanelProps {
   ds: string;
 }
 
-//@ts-ignore
-
-let Buckets: any[] = [];
 
 function RenderRow(props: ListChildComponentProps) {
+  //@ts-ignore
+  const { changeBucket,...other} = React.useContext(ConditionContext);
+  let Buckets=React.useContext(BucketsContext)
   const { index, style } = props;
   return (
     <ListItem style={style} key={index} component='div' disablePadding>
-      <ListItemButton>
-        <ListItemText primary={`${Buckets[index]}`} sx={{ textAlign: 'center' }} />
+      <ListItemButton onClick={(e)=>{changeBucket(e,Buckets[index])}}>
+        <ListItemText primary={`${Buckets[index]}`} sx={{ textAlign: 'center' }}  />
       </ListItemButton>
     </ListItem>
   );
 }
 
-
 function VirtualizedList(props: any) {
-  const [, updateState] = React.useState();
-  //@ts-ignore
-  const forceUpdate = React.useCallback(() => updateState({}), []);
-  React.useEffect(
-    () => {
-      forceUpdate();
-    },
-  );
+  let Buckets=React.useContext(BucketsContext)
   return (
     <Box
       sx={{ width: '100%', height: '100%', bgcolor: 'background.paper' }}
@@ -68,38 +61,6 @@ function VirtualizedList(props: any) {
 export default function TabPanel(props: TabPanelProps) {
 
   const { children, value, index, ds, ...other } = props;
-
-  const info = React.useContext(InfoContext);
-  // @ts-ignore
-  const { ip, port, token } = info;
-  const [reg, setReg] = React.useState('*');
-
-  function getBuckets() {
-    axios.get(`http://${ip}:${port}/common/getAll/${ds}/${reg}?token=${token}`).then(
-      (response) => {
-        if (response.data.code == 200) {
-          if (response.data.data == null) {
-            Buckets = [];
-          } else {
-            Buckets = response.data.data;
-          }
-        }
-      },
-    );
-  }
-
-  React.useEffect(() => {
-    if (value === index) {
-      getBuckets();
-    }
-  });
-
-  // @ts-ignore
-  const handleSubmit = function(event) {
-    const data = new FormData(event.currentTarget);
-    setReg(data.get('text') as string);
-  };
-
   // @ts-ignore
   return (
     <div
@@ -119,7 +80,7 @@ export default function TabPanel(props: TabPanelProps) {
                 Filter</Button>
             </Toolbar>
           </Box>
-          <VirtualizedList data={Buckets} />
+          <VirtualizedList />
           <Divider />
         </>
       )}
