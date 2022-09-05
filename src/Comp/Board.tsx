@@ -5,6 +5,8 @@ import Paper from '@mui/material/Paper';
 import Grid from '@mui/material/Grid';
 import { Button, FormControlLabel, Radio, RadioGroup, TextField } from '@mui/material';
 import  Table  from './Table';
+import { GetAllString } from '../backend/GetData';
+import {Response} from '../backend/Response';
 
 const Item = styled(Paper)(({ theme }) => ({
   backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
@@ -19,8 +21,24 @@ export default class Board extends React.Component {
   //@ts-ignore
   constructor(props) {
     super(props);
+    this.state={
+      data:{}
+    }
   }
-
+  componentWillReceiveProps (nextProps: { condition: { ds: any; bucket: any; }; }){
+    const {ds,bucket}=nextProps.condition
+    if (ds=="string"){
+      GetAllString(bucket).then(
+        res=>{
+          if (res.data.code===200){
+            this.setState({data:res.data.data})
+          }else{
+            this.setState({data:{}})
+          }
+        }
+      )
+    }
+  }
   //@ts-ignore
   render() {
     // @ts-ignore
@@ -50,7 +68,10 @@ export default class Board extends React.Component {
             <Button variant='outlined' size='large' sx={{ mt: 1 }}>Submit</Button>
           </Grid>
         </Grid>
-        <Table />
+        <Table
+          //@ts-ignore
+          data={this.state.data}/>
+
       </>
     );
   }

@@ -19,19 +19,21 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
 }));
 
 export interface DialogTitleProps {
-  id: string;
+  rowKey:string;
+  id?: string;
   children?: React.ReactNode;
   onClose: (event:any) => void;
 }
 
-const BootstrapDialogTitle = (props: DialogTitleProps) => {
-  const { children, onClose, ...other } = props;
+const BootstrapDialogTitle = (props:DialogTitleProps) => {
+  const { rowKey,onClose, ...other } = props;
 
   return (
     <DialogTitle sx={{ m: 0, p: 2 }} {...other}>
-      {children}
       {onClose ? (
-        <IconButton
+        <>
+          {rowKey}
+          <IconButton
           aria-label='close'
           onClick={onClose}
           sx={{
@@ -43,6 +45,7 @@ const BootstrapDialogTitle = (props: DialogTitleProps) => {
         >
           <CloseIcon />
         </IconButton>
+        </>
       ) : null}
     </DialogTitle>
   );
@@ -57,7 +60,6 @@ export default class Message extends React.Component {
     this.handleClickOpen = this.handleClickOpen.bind(this);
     this.handleClose = this.handleClose.bind(this);
   }
-
   //@ts-ignore
   handleClickOpen (event){
     event.stopPropagation();
@@ -73,7 +75,7 @@ export default class Message extends React.Component {
 
   render() {
     // @ts-ignore
-    const { children } = this.props;
+    const { rowKey,value } = this.props;
     // @ts-ignore
     const { open } = this.state;
     return (
@@ -88,15 +90,16 @@ export default class Message extends React.Component {
           open={open}
         >
 
-          <BootstrapDialogTitle id='customized-dialog-title' onClose={(event:MouseEvent)=>{
+          <BootstrapDialogTitle
+            //@ts-ignore
+            rowKey={rowKey} id='customized-dialog-title' onClose={(event:MouseEvent)=>{
             return this.handleClose(event);}}>
-            {children}
           </BootstrapDialogTitle>
-          <DialogContent dividers sx={{ m: 25 }}>
-            <Typography>
-              Value
-            </Typography>
+
+          <DialogContent dividers sx={{ m: 5, minWidth: 300, minHeight: 200,textAlign:'center' }}>
+              {value}
           </DialogContent>
+
           <DialogActions>
             <Button autoFocus onClick={this.handleClose}>
               Close
