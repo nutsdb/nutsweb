@@ -38,7 +38,6 @@ export default function Connect() {
   const handleSubmit = function(event) {
     event.preventDefault();
 
-
     const validate = function(value: any): boolean {
       if (!value || typeof value !== 'string' || value.length === 0) {
         return false;

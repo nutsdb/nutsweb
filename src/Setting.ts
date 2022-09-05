@@ -29,6 +29,7 @@ export function postWithJSON(url: string, data: Record<string, any>): Promise<Re
   });
 }
 
+
 export function isLoggedIn() {
   return localStorage.getItem('token') != null;
 }

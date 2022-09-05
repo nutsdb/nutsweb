@@ -19,7 +19,7 @@ const textSize = {
 };
 
 export const InfoContext = React.createContext(null);
-
+export const ConditionContext = React.createContext({});
 export default class Index extends React.Component {
   // @ts-ignore
   constructor(props) {
@@ -29,21 +29,42 @@ export default class Index extends React.Component {
       port: localStorage.getItem('port'),
       alias: localStorage.getItem('alias'),
       token: localStorage.getItem('token'),
+      ds: 'string' as string,
+      bucket: '' as string,
     };
+    this.changeDs = this.changeDs.bind(this);
+    this.changeBucket = this.changeBucket.bind(this);
   }
 
-  render() {
+  changeDs(e: any, value: string) {
+    this.setState({
+      ...this.state,
+      ds: value,
+      bucket:""
+    });
+  }
 
+  changeBucket(e: any, bucket: string) {
+    this.setState({
+      ...this.state,
+      bucket: bucket,
+    });
+  }
+
+
+  render() {
     if (!Setting.isLoggedIn()) {
       setTimeout(() => window.location.href = '/', 1500);
-      return <Alert severity='error' style={{ width: '300px', margin: "auto" }} onClose={() => window.location.href = '/'}>
+      return <Alert severity='error' style={{ width: '300px', margin: 'auto' }}
+                    onClose={() => window.location.href = '/'}>
         you are not logged in
       </Alert>;
     }
-
     // @ts-ignore
     const { ip, port, alias } = this.state;
     // @ts-ignore
+    const condition={ds:this.state.ds , bucket:this.state.bucket}
+
     return (
       <Box sx={{ display: 'flex' }}>
         <CssBaseline />
@@ -53,7 +74,9 @@ export default class Index extends React.Component {
         >
           <Toolbar>
             <Typography variant='h4' noWrap component='div'>
-              NutsDB
+              {
+              //@ts-ignore
+              `NutsDB  \\  ${this.state.ds}  \\  ${this.state.bucket}`}
             </Typography>
           </Toolbar>
         </AppBar>
@@ -88,8 +111,10 @@ export default class Index extends React.Component {
 
           <InfoContext.Provider
             //@ts-ignore
-            value={this.state} >
-            <VerticalTabs />
+            value={this.state}>
+            <ConditionContext.Provider value={{ changeDs: this.changeDs, changeBucket: this.changeBucket }}>
+              <VerticalTabs />
+            </ConditionContext.Provider>
           </InfoContext.Provider>
 
           <Divider />
@@ -98,9 +123,12 @@ export default class Index extends React.Component {
           component='main'
           sx={{ flexGrow: 1, bgcolor: 'background.default', p: 3, mt: 10 }}
         >
-          {/*添加主要界面*/}
-          <Board />
+          <Board
+            //@ts-ignore
+            condition={condition} />
+
           <Divider />
+
         </Box>
 
       </Box>
