@@ -8,10 +8,11 @@ import Typography from '@mui/material/Typography';
 import Divider from '@mui/material/Divider';
 import Alert from '@mui/material/Alert';
 import * as Setting from '../../Setting';
-
+import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 // @ts-ignore
 import VerticalTabs from '/src/Comp/Tab';
 import Board from '../../Comp/Board';
+import { FormControlLabel, FormGroup, Switch, Tooltip } from '@mui/material';
 
 const drawerWidth = 240;
 const textSize = {
@@ -20,6 +21,7 @@ const textSize = {
 
 export const InfoContext = React.createContext(null);
 export const ConditionContext = React.createContext({});
+export const ThrottleContext = React.createContext(false);
 export default class Index extends React.Component {
   // @ts-ignore
   constructor(props) {
@@ -31,6 +33,7 @@ export default class Index extends React.Component {
       token: localStorage.getItem('token'),
       ds: 'string' as string,
       bucket: '' as string,
+      checked: false,
     };
     this.changeDs = this.changeDs.bind(this);
     this.changeBucket = this.changeBucket.bind(this);
@@ -40,7 +43,7 @@ export default class Index extends React.Component {
     this.setState({
       ...this.state,
       ds: value,
-      bucket:""
+      bucket: '',
     });
   }
 
@@ -61,9 +64,9 @@ export default class Index extends React.Component {
       </Alert>;
     }
     // @ts-ignore
-    const { ip, port, alias } = this.state;
+    const { ip, port, alias, checked } = this.state;
     // @ts-ignore
-    const condition={ds:this.state.ds , bucket:this.state.bucket}
+    const condition = { ds: this.state.ds, bucket: this.state.bucket };
 
     return (
       <Box sx={{ display: 'flex' }}>
@@ -75,9 +78,22 @@ export default class Index extends React.Component {
           <Toolbar>
             <Typography variant='h4' noWrap component='div'>
               {
-              //@ts-ignore
-              `NutsDB  \\  ${this.state.ds}  \\  ${this.state.bucket}`}
+                //@ts-ignore
+                `NutsDB  \\  ${this.state.ds}  \\  ${this.state.bucket}`}
             </Typography>
+            <FormGroup sx={{ ml: 'auto' }}>
+              <FormControlLabel control={<Switch checked={
+                //@ts-ignore
+                this.state.checked} onChange={() => {
+                this.setState({ ...this.state, checked: !checked });
+              }} color='info' />} label='Throttle' labelPlacement='start' />
+            </FormGroup>
+
+            <Tooltip title='Throttle means that NutsWeb will not actively send requests for all key-value pairs'
+                     sx={{ maxWidth: 300 }}>
+              <HelpOutlineIcon sx={{ mr: 10, ml: 5 }} />
+            </Tooltip>
+
           </Toolbar>
         </AppBar>
 
@@ -93,7 +109,6 @@ export default class Index extends React.Component {
           variant='permanent'
           anchor='left'
         >
-
           <Toolbar>
             <Typography variant='h5' noWrap component='div' sx={{ color: 'gray', flex: '80%' }}>
               {ip} : {port}
@@ -108,24 +123,31 @@ export default class Index extends React.Component {
             Selecting a data structure
           </Typography>
           <Divider />
-
           <InfoContext.Provider
             //@ts-ignore
             value={this.state}>
-            <ConditionContext.Provider value={{ changeDs: this.changeDs, changeBucket: this.changeBucket }}>
-              <VerticalTabs />
-            </ConditionContext.Provider>
-          </InfoContext.Provider>
+            <ThrottleContext.Provider value={checked}>
+              <ConditionContext.Provider value={{ changeDs: this.changeDs, changeBucket: this.changeBucket }}>
 
+                <VerticalTabs />
+
+              </ConditionContext.Provider>
+            </ThrottleContext.Provider>
+          </InfoContext.Provider>
           <Divider />
         </Drawer>
         <Box
           component='main'
           sx={{ flexGrow: 1, bgcolor: 'background.default', p: 3, mt: 10 }}
         >
-          <Board
-            //@ts-ignore
-            condition={condition} />
+
+          <ThrottleContext.Provider value={checked}>
+
+            <Board
+              //@ts-ignore
+              condition={condition} />
+
+          </ThrottleContext.Provider>
 
           <Divider />
 

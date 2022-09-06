@@ -22,7 +22,6 @@ function RenderRow(props: ListChildComponentProps) {
   const { changeBucket,...other} = React.useContext(ConditionContext);
   // @ts-ignore
   const { idx,setIdx} = React.useContext(IdxContext);
-
   let Buckets=React.useContext(BucketsContext)
   const { index, style } = props;
   return (
