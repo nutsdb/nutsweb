@@ -6,52 +6,65 @@ import { FixedSizeList, ListChildComponentProps } from 'react-window';
 import Box from '@mui/material/Box';
 // @ts-ignore
 import AutoSizer from 'react-virtualized-auto-sizer';
+import axios from 'axios';
+import { ConditionContext, InfoContext } from '../pages/Index';
+import { BucketsContext, IdxContext } from './Tab';
 
 interface TabPanelProps {
   children?: React.ReactNode;
   index: number;
   value: number;
+  ds: string;
 }
 
-function renderRow(props: ListChildComponentProps) {
+function RenderRow(props: ListChildComponentProps) {
+  //@ts-ignore
+  const { changeBucket,...other} = React.useContext(ConditionContext);
+  // @ts-ignore
+  const { idx,setIdx} = React.useContext(IdxContext);
+  let Buckets=React.useContext(BucketsContext)
   const { index, style } = props;
   return (
     <ListItem style={style} key={index} component='div' disablePadding>
-      <ListItemButton>
-        <ListItemText primary={`Buckets ${index + 1}`} sx={{textAlign:'center'}} />
+      <ListItemButton    onClick={(e)=>{changeBucket(e,Buckets[index]);setIdx(index)}}>
+        <ListItemText primary={`${Buckets[index]}`} sx={{ textAlign: 'center',color:index==idx?"#0047AB":'black'}}   />
       </ListItemButton>
     </ListItem>
   );
 }
 
+function VirtualizedList(props: any) {
 
-function VirtualizedList() {
+  let Buckets=React.useContext(BucketsContext)
+  const [Index,setIndex]=React.useState(-1)
 
-  // @ts-ignore
   return (
     <Box
       sx={{ width: '100%', height: '100%', bgcolor: 'background.paper' }}
     >
       <AutoSizer>
-        {({ height: height, width:width  }) => (
-          <FixedSizeList
-            height={height}
-            width={width}
-            itemSize={60}
-            itemCount={100}
-            overscanCount={5}
-          >
-            {renderRow}
-          </FixedSizeList>
-        )}
+        { //@ts-ignore
+          ({ height: height, width: width },
+          ) => (
+            <FixedSizeList
+              height={height}
+              width={width}
+              itemSize={60}
+              itemCount={Buckets.length}
+              overscanCount={5}
+            >
+              {RenderRow}
+            </FixedSizeList>
+          )}
       </AutoSizer>
-
     </Box>
   );
 }
 
+//@ts-ignore
 export default function TabPanel(props: TabPanelProps) {
-  const { children, value, index, ...other } = props;
+
+  const { children, value, index, ds, ...other } = props;
   // @ts-ignore
   return (
     <div
@@ -64,13 +77,14 @@ export default function TabPanel(props: TabPanelProps) {
     >
       {value === index && (
         <>
-          <Toolbar sx={{ m: 1 }}>
-            <TextField id='outlined-basic' label='Bucket' variant='outlined' sx={{ width: '70%' }} />
-            <Button variant='contained' size='large' sx={{ ml: 7, height: 50 }}>Filter</Button>
-          </Toolbar>
-          {/*Ajax查询buckets*/}
+          <Box component='form'>
+            <Toolbar sx={{ m: 1 }}>
+              <TextField id='outlined-basic' label='Bucket' name='text' variant='outlined' sx={{ width: '70%' }} />
+              <Button type='submit' variant='contained' size='large' sx={{ ml: 7, height: 50 }}>
+                Filter</Button>
+            </Toolbar>
+          </Box>
           <VirtualizedList />
-
           <Divider />
         </>
       )}

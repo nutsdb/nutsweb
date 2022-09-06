@@ -24,33 +24,20 @@ import Message from './Message';
 interface Data {
   key: string;
   length: number;
+  value: string
 }
 
 function createData(
   key: string,
   length: number,
+  value: string
 ): Data {
   return {
     key,
     length,
+    value,
   };
 }
-
-const rows = [
-  createData('Cupcake', 305),
-  createData('Donut', 452),
-  createData('Eclair', 262),
-  createData('Frozen yoghurt', 159),
-  createData('Gingerbread', 356),
-  createData('Honeycomb', 408),
-  createData('Ice cream sandwich', 237),
-  createData('Jelly Bean', 375),
-  createData('KitKat', 518),
-  createData('Lollipop', 392),
-  createData('Marshmallow', 318),
-  createData('Nougat', 360),
-  createData('Oreo', 437),
-];
 
 function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
   if (b[orderBy] < a[orderBy]) {
@@ -96,6 +83,7 @@ interface HeadCell {
 }
 
 //@ts-ignore
+
 const headCells: readonly HeadCell[] = [
   {
     id: 'key',
@@ -110,6 +98,7 @@ const headCells: readonly HeadCell[] = [
     label: 'Length',
   },
   {
+    // @ts-ignore
     id: 'value',
     numeric: false,
     disablePadding: false,
@@ -153,7 +142,9 @@ function EnhancedTableHead(props: EnhancedTableProps) {
           headCells.map((headCell) => (
             <TableCell
               key={headCell.id}
-              align={headCell.numeric || headCell.id === 'value' ? 'right' : 'left'}
+              align={//@ts-ignore
+                headCell.numeric || headCell.id == 'value' ? 'right' : 'left'
+              }
               padding={headCell.disablePadding ? 'none' : 'normal'}
               sortDirection={orderBy === headCell.id ? order : false}
             >
@@ -221,7 +212,7 @@ const EnhancedTableToolbar = (props: EnhancedTableToolbarProps) => {
         </Tooltip>
       ) : (
         <Tooltip title='Delete'>
-          <IconButton disabled={true}>
+          <IconButton disabled={false}>
             <DeleteIcon />
           </IconButton>
         </Tooltip>
@@ -230,7 +221,9 @@ const EnhancedTableToolbar = (props: EnhancedTableToolbarProps) => {
   );
 };
 
-export default function EnhancedTable() {
+export default function EnhancedTable(props:any) {
+
+  const [rows, setRows] = React.useState<Data[]>([]);
   const [order, setOrder] = React.useState<Order>('asc');
   const [orderBy, setOrderBy] = React.useState<keyof Data>('key');
   const [selected, setSelected] = React.useState<readonly string[]>([]);
@@ -246,6 +239,17 @@ export default function EnhancedTable() {
     setOrder(isAsc ? 'desc' : 'asc');
     setOrderBy(property);
   };
+  React.useEffect(
+    ()=>{
+        let data =props.data
+        let tmp =[]
+        for(let i  in data){
+          tmp.push(createData(i,data[i].length,data[i]))
+        }
+        setRows(tmp)
+    }
+  ,[props.data]
+  )
 
   const handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.checked) {
@@ -296,6 +300,7 @@ export default function EnhancedTable() {
     page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
 
   return (
+    <>
     <Box sx={{ width: '100%' }}>
       <Paper sx={{ width: '100%', mb: 2 }}>
         <EnhancedTableToolbar numSelected={selected.length} />
@@ -320,6 +325,7 @@ export default function EnhancedTable() {
                   const isItemSelected = isSelected(row.key);
                   const labelId = `enhanced-table-checkbox-${index}`;
 
+                  // @ts-ignore
                   return (
                     <TableRow
                       hover
@@ -350,9 +356,11 @@ export default function EnhancedTable() {
                       <TableCell align='right'>{row.length}</TableCell>
 
                       <TableCell align='right'>
-                        <Message>
-                          {row.key}
-                        </Message>
+
+                        <Message
+                          //@ts-ignore
+                          rowKey={row.key} value={row.value}/>
+
                       </TableCell>
 
                     </TableRow>
@@ -385,6 +393,7 @@ export default function EnhancedTable() {
         label='Dense padding'
       />
     </Box>
+    </>
   );
 }
 
