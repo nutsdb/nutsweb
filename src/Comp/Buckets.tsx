@@ -8,7 +8,7 @@ import Box from '@mui/material/Box';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import axios from 'axios';
 import { ConditionContext, InfoContext } from '../pages/Index';
-import { BucketsContext} from './Tab';
+import { BucketsContext, IdxContext } from './Tab';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -17,23 +17,28 @@ interface TabPanelProps {
   ds: string;
 }
 
-
 function RenderRow(props: ListChildComponentProps) {
   //@ts-ignore
   const { changeBucket,...other} = React.useContext(ConditionContext);
+  // @ts-ignore
+  const { idx,setIdx} = React.useContext(IdxContext);
+
   let Buckets=React.useContext(BucketsContext)
   const { index, style } = props;
   return (
     <ListItem style={style} key={index} component='div' disablePadding>
-      <ListItemButton onClick={(e)=>{changeBucket(e,Buckets[index])}}>
-        <ListItemText primary={`${Buckets[index]}`} sx={{ textAlign: 'center' }}  />
+      <ListItemButton    onClick={(e)=>{changeBucket(e,Buckets[index]);setIdx(index)}}>
+        <ListItemText primary={`${Buckets[index]}`} sx={{ textAlign: 'center',color:index==idx?"#0047AB":'black'}}   />
       </ListItemButton>
     </ListItem>
   );
 }
 
 function VirtualizedList(props: any) {
+
   let Buckets=React.useContext(BucketsContext)
+  const [Index,setIndex]=React.useState(-1)
+
   return (
     <Box
       sx={{ width: '100%', height: '100%', bgcolor: 'background.paper' }}

@@ -5,7 +5,6 @@ import Box from '@mui/material/Box';
 import TabPanel from './Buckets';
 import axios from 'axios';
 import { ConditionContext, InfoContext } from '../pages/Index';
-
 function a11yProps(index: number) {
   return {
     id: `vertical-tab-${index}`,
@@ -14,6 +13,7 @@ function a11yProps(index: number) {
 }
 
 export const BucketsContext = React.createContext([]);
+export const IdxContext = React.createContext(-1);
 
 export default function VerticalTabs() {
   const info = React.useContext(InfoContext);
@@ -29,6 +29,8 @@ export default function VerticalTabs() {
   };
   const [value, setValue] = React.useState(0);
   const [Buckets, setBuckets] = React.useState([]);
+
+  const [idx, setIdx] = React.useState(-1);
 
   function getBuckets(ds:string ,reg:string) {
     axios.get(`http://${ip}:${port}/common/getAll/${ds}/${reg}?token=${token}`).then(
@@ -48,6 +50,7 @@ export default function VerticalTabs() {
     setValue(newValue);
     let ds =m[newValue] as string
     changeDs(event,ds)
+    setIdx(-1)
     getBuckets(ds,"*")
   };
   //初始化加载
@@ -73,6 +76,9 @@ export default function VerticalTabs() {
         <Tab label='ZSet'   {...a11yProps(3)} sx={{ height: 80 }} />
       </Tabs>
       <BucketsContext.Provider value={Buckets}>
+        <IdxContext.Provider
+          //@ts-ignore
+          value={{idx,setIdx}}>
       <TabPanel value={value} index={0} ds={'string'}>
         String
       </TabPanel>
@@ -85,6 +91,7 @@ export default function VerticalTabs() {
       <TabPanel value={value} index={3} ds={'zset'}>
         ZSet
       </TabPanel>
+        </IdxContext.Provider>
       </BucketsContext.Provider>
     </Box>
     </>

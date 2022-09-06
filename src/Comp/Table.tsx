@@ -212,7 +212,7 @@ const EnhancedTableToolbar = (props: EnhancedTableToolbarProps) => {
         </Tooltip>
       ) : (
         <Tooltip title='Delete'>
-          <IconButton disabled={true}>
+          <IconButton disabled={false}>
             <DeleteIcon />
           </IconButton>
         </Tooltip>
@@ -230,7 +230,6 @@ export default function EnhancedTable(props:any) {
   const [page, setPage] = React.useState(0);
   const [dense, setDense] = React.useState(false);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
-
 
   const handleRequestSort = (
     event: React.MouseEvent<unknown>,
