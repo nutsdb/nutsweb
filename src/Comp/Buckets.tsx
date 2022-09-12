@@ -6,9 +6,9 @@ import { FixedSizeList, ListChildComponentProps } from 'react-window';
 import Box from '@mui/material/Box';
 // @ts-ignore
 import AutoSizer from 'react-virtualized-auto-sizer';
-import axios from 'axios';
-import { ConditionContext, InfoContext } from '../pages/Index';
+import { ConditionContext } from '../pages/Index';
 import { BucketsContext, IdxContext } from './Tab';
+import { preventOverflow } from '@popperjs/core';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -19,15 +19,19 @@ interface TabPanelProps {
 
 function RenderRow(props: ListChildComponentProps) {
   //@ts-ignore
-  const { changeBucket,...other} = React.useContext(ConditionContext);
+  const { changeBucket, ...other } = React.useContext(ConditionContext);
   // @ts-ignore
-  const { idx,setIdx} = React.useContext(IdxContext);
-  let Buckets=React.useContext(BucketsContext)
+  const { idx, setIdx } = React.useContext(IdxContext);
+  let Buckets = React.useContext(BucketsContext);
   const { index, style } = props;
   return (
     <ListItem style={style} key={index} component='div' disablePadding>
-      <ListItemButton    onClick={(e)=>{changeBucket(e,Buckets[index]);setIdx(index)}}>
-        <ListItemText primary={`${Buckets[index]}`} sx={{ textAlign: 'center',color:index==idx?"#0047AB":'black'}}   />
+      <ListItemButton onClick={(e) => {
+        changeBucket(e, Buckets[index]);
+        setIdx(index);
+      }}>
+        <ListItemText primary={`${Buckets[index]}`}
+                      sx={{ textAlign: 'center', color: index == idx ? '#0047AB' : 'black' }} />
       </ListItemButton>
     </ListItem>
   );
@@ -35,8 +39,8 @@ function RenderRow(props: ListChildComponentProps) {
 
 function VirtualizedList(props: any) {
 
-  let Buckets=React.useContext(BucketsContext)
-  const [Index,setIndex]=React.useState(-1)
+  let Buckets = React.useContext(BucketsContext);
+  const [Index, setIndex] = React.useState(-1);
 
   return (
     <Box
@@ -63,9 +67,14 @@ function VirtualizedList(props: any) {
 
 //@ts-ignore
 export default function TabPanel(props: TabPanelProps) {
-
-  const { children, value, index, ds, ...other } = props;
   // @ts-ignore
+  const { idx, setIdx, setReg } = React.useContext(IdxContext);
+  const { children, value, index, ds, ...other } = props;
+  const [text, setText] = React.useState('');
+  // @ts-ignore
+  const handleTextInputChange = event => {
+    setText(event.target.value);
+  };
   return (
     <div
       role='tabpanel'
@@ -79,8 +88,11 @@ export default function TabPanel(props: TabPanelProps) {
         <>
           <Box component='form'>
             <Toolbar sx={{ m: 1 }}>
-              <TextField id='outlined-basic' label='Bucket' name='text' variant='outlined' sx={{ width: '70%' }} />
-              <Button type='submit' variant='contained' size='large' sx={{ ml: 7, height: 50 }}>
+              <TextField id='outlined-basic'  onChange= {handleTextInputChange} label='Bucket' name='text' variant='outlined' sx={{ width: '70%' }} />
+              <Button onClick={(event) => {
+                  event.preventDefault()
+                  setReg(`${text}`)
+              }} type='submit' variant='contained' size='large' sx={{ ml: 7, height: 50 }}>
                 Filter</Button>
             </Toolbar>
           </Box>
