@@ -32,33 +32,69 @@ export default function VerticalTabs() {
   const [value, setValue] = React.useState(0);
   const [Buckets, setBuckets] = React.useState([]);
 
+  const [reg, setReg] = React.useState('*');
   const [idx, setIdx] = React.useState(-1);
 
-  function getBuckets(ds: string, reg: string) {
-    axios.get(`http://${ip}:${port}/common/getAll/${ds}/${reg}?token=${token}`).then(
+   function getBuckets(ds: string, reg: string) {
+     return axios.get(`http://${ip}:${port}/common/getAll/${ds}/${reg}?token=${token}`).then(
       (response) => {
+        let buckets=[]
         if (response.data.code == 200) {
           if (response.data.data == null) {
             setBuckets([]);
           } else {
+            buckets=response.data.data
             setBuckets(response.data.data);
           }
         }
+        return buckets
       },
     );
   }
+
+
+  function filterBuckets(reg: string) {
+    let ds = m[value] as string;
+    if (reg == '') {
+      reg = '*';
+    }
+    getBuckets(ds, '*').then((buckets)=>{
+      let tmp = [];
+      for (let i = 0; i < buckets.length; i++) {
+        let bucket: string = buckets[i];
+        if (bucket.includes(reg)) {
+          tmp.push(bucket as string);
+        }
+      }
+      //regular expression
+      if (tmp.length == 0) {
+        getBuckets(ds, reg);
+        return;
+      } else {
+        // @ts-ignore
+        setBuckets(tmp);
+      }
+    });
+
+  }
+
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
     let ds = m[newValue] as string;
     changeDs(event, ds);
     setIdx(-1);
+    setReg('');
     if (!checked) {
       getBuckets(ds, '*');
-    }else{
+    } else {
       setBuckets([]);
     }
   };
+
+  React.useEffect(() => {
+    filterBuckets(reg);
+  }, [reg]);
 
   //初始化加载
   React.useEffect(() => {
@@ -88,7 +124,7 @@ export default function VerticalTabs() {
         <BucketsContext.Provider value={Buckets}>
           <IdxContext.Provider
             //@ts-ignore
-            value={{ idx, setIdx }}>
+            value={{ idx, setIdx, setReg }}>
             <TabPanel value={value} index={0} ds={'string'}>
               String
             </TabPanel>
