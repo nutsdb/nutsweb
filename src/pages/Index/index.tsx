@@ -10,8 +10,8 @@ import Alert from '@mui/material/Alert';
 import * as Setting from '../../Setting';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 // @ts-ignore
-import VerticalTabs from '/src/Comp/Tab';
-import Board from '../../Comp/Board';
+import VerticalTabs from '/src/comps/Tab';
+import Board from '../../comps/Board';
 import { FormControlLabel, FormGroup, Switch, Tooltip } from '@mui/material';
 
 const drawerWidth = 240;
@@ -142,11 +142,9 @@ export default class Index extends React.Component {
         >
 
           <ThrottleContext.Provider value={checked}>
-
             <Board
               //@ts-ignore
               condition={condition} />
-
           </ThrottleContext.Provider>
 
           <Divider />
