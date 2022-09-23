@@ -77,6 +77,10 @@ export default function VerticalTabs() {
     });
 
   }
+  const changeReg=(reg:string)=>{
+     setReg(reg)
+    filterBuckets(reg);
+  }
 
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
@@ -91,10 +95,6 @@ export default function VerticalTabs() {
       setBuckets([]);
     }
   };
-
-  React.useEffect(() => {
-    filterBuckets(reg);
-  }, [reg]);
 
   //初始化加载
   React.useEffect(() => {
@@ -124,7 +124,7 @@ export default function VerticalTabs() {
         <BucketsContext.Provider value={Buckets}>
           <IdxContext.Provider
             //@ts-ignore
-            value={{ idx, setIdx, setReg }}>
+            value={{ idx, setIdx, changeReg }}>
             <TabPanel value={value} index={0} ds={'string'}>
               String
             </TabPanel>

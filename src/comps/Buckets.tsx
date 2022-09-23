@@ -44,7 +44,7 @@ function VirtualizedList(props: any) {
 
   return (
     <Box
-      sx={{ width: '100%', height: '100%', bgcolor: 'background.paper' }}
+      sx={{ width: '100%', height: '90%', bgcolor: 'background.paper' }}
     >
       <AutoSizer>
         { //@ts-ignore
@@ -68,7 +68,7 @@ function VirtualizedList(props: any) {
 //@ts-ignore
 export default function TabPanel(props: TabPanelProps) {
   // @ts-ignore
-  const { idx, setIdx, setReg } = React.useContext(IdxContext);
+  const { idx, setIdx, changeReg } = React.useContext(IdxContext);
   const { children, value, index, ds, ...other } = props;
   const [text, setText] = React.useState('');
   // @ts-ignore
@@ -91,7 +91,7 @@ export default function TabPanel(props: TabPanelProps) {
               <TextField id='outlined-basic'  onChange= {handleTextInputChange} label='Bucket' name='text' variant='outlined' sx={{ width: '70%' }} />
               <Button onClick={(event) => {
                   event.preventDefault()
-                  setReg(`${text}`)
+                changeReg(`${text}`)
               }} type='submit' variant='contained' size='large' sx={{ ml: 7, height: 50 }}>
                 Filter</Button>
             </Toolbar>
