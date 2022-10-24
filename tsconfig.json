@@ -16,6 +16,11 @@
     "noEmit": true,
     "jsx": "react-jsx"
   },
+  "scripts":[
+    {
+      "build":"webpack"
+    }
+  ],
   "include": ["src"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
