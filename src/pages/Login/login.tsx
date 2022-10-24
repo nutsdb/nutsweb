@@ -88,6 +88,7 @@ export default function Connect() {
         changeShow(false);
         if (response.data.code == 200) {
           //login success
+          localStorage.clear()
           localStorage.setItem('token', response.data.data);
           localStorage.setItem('ip',form.ip as string);
           localStorage.setItem('alias',form.alias as string);
