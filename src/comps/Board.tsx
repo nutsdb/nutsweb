@@ -242,14 +242,14 @@ export default class Board extends React.Component {
 
         <Box component='form' onSubmit={this.handleSubmit}>
           <Grid container spacing={1}>
-            <Grid item xs={10}>
+            <Grid item xs={9.5}>
               <RadioGroup
                 row
                 aria-labelledby='demo-radio-buttons-group-label'
                 defaultValue='single'
                 name='radio-buttons-group'
               >
-                <Grid item xs={4}>
+                <Grid item xs>
                   {flag && !isZSet && <Typography variant='h5' noWrap component='div'
                                                   sx={{
                                                     mr: 6,
@@ -281,7 +281,7 @@ export default class Board extends React.Component {
                   {flag && !isZSet && <Typography variant='h5' noWrap component='div'
                                                   sx={{
                                                     ml: 3,
-                                                    mr: 6,
+                                                    mr: 4,
                                                     pt: 2,
                                                     textAlign: 'center',
                                                     color: 'gray',
@@ -294,16 +294,16 @@ export default class Board extends React.Component {
                                     sx={{ mt: 1, ml: ml, display: display, color: 'gray' }} />
 
                   <TextField id='outlined-basic' label={isSet ? 'KeyWord' : 'Start'} name='start' variant='outlined'
-                             sx={{ mr: mr, mb: 2, width: isZSet ? 0.3 : 'initial' }}
+                             sx={{ mr: mr, mb: 2, width:  0.3 ,display: 'inline-block', }}
                   />
 
                   <TextField id='outlined-basic' label={isSet ? 'KeyWord' : 'End'}
                              name='end' variant='outlined'
-                             sx={{ display: isSet ? 'none' : 'inline-block', width: isZSet ? 0.3 : 'initial' }} />
+                             sx={{ display: isSet ? 'none' : 'inline-block', width: 0.3 }} />
                 </Grid>
               </RadioGroup>
             </Grid>
-            <Grid item xs={1}>
+            <Grid item xs>
               <Button variant='outlined' size='large' type='submit' sx={{ mt: 1, ml: 6 }}>Submit</Button>
             </Grid>
           </Grid>

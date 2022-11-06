@@ -12,7 +12,9 @@ import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 // @ts-ignore
 import VerticalTabs from '/src/comps/Tab';
 import Board from '../../comps/Board';
-import { FormControlLabel, FormGroup, Switch, Tooltip } from '@mui/material';
+import { Button, FormControlLabel, FormGroup, Switch, Tooltip } from '@mui/material';
+import LogoutIcon from '@mui/icons-material/Logout';
+import { Link } from 'react-router-dom';
 
 const drawerWidth = 240;
 const textSize = {
@@ -57,9 +59,11 @@ export default class Index extends React.Component {
 
   render() {
     if (!Setting.isLoggedIn()) {
-      setTimeout(() => window.location.href = '/', 1500);
+      // @ts-ignore
+      const history =this.props.history;
+      setTimeout(() => history.push('/'), 1500);
       return <Alert severity='error' style={{ width: '300px', margin: 'auto' }}
-                    onClose={() => window.location.href = '/'}>
+                    onClose={() => history.push('/')}>
         you are not logged in
       </Alert>;
     }
@@ -91,8 +95,14 @@ export default class Index extends React.Component {
 
             <Tooltip title='Throttle means that NutsWeb will not actively send requests for all key-value pairs'
                      sx={{ maxWidth: 300 }}>
-              <HelpOutlineIcon sx={{ mr: 10, ml: 5 }} />
+              <HelpOutlineIcon sx={{ mr: 10, ml: 2 }} />
             </Tooltip>
+
+            <Link to="/">
+              <Button  sx={{mr:1}} variant='contained'  startIcon={<LogoutIcon />}>
+                Logout
+              </Button>
+            </Link>
 
           </Toolbar>
         </AppBar>

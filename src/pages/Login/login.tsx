@@ -12,7 +12,7 @@ import { createTheme, ThemeProvider } from '@mui/material/styles';
 import StorageIcon from '@mui/icons-material/Storage';
 import axios from 'axios';
 import { Alert, AlertColor, LinearProgress, Snackbar } from '@mui/material';
-import { useNavigate  } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import * as Setting from '../../Setting';
 
 const theme = createTheme();
@@ -88,11 +88,14 @@ export default function Connect() {
         changeShow(false);
         if (response.data.code == 200) {
           //login success
+          localStorage.clear()
           localStorage.setItem('token', response.data.data);
           localStorage.setItem('ip',form.ip as string);
           localStorage.setItem('alias',form.alias as string);
           localStorage.setItem('port',form.port as string);
-          showMessage('success', 'login successful', () => window.location.href = '/index');
+          showMessage('success', 'login successful', () => {
+                  history("/index")
+          });
           // @ts-ignore
         } else {
           showMessage('error', `login failed: ${response.data.error}`);
