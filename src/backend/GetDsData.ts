@@ -1,9 +1,9 @@
 // Get a range list
 import axios from 'axios';
 
-const token = localStorage.getItem('token');
-const ip = localStorage.getItem('ip');
-const port = localStorage.getItem('port');
+let token = localStorage.getItem('token');
+let ip = localStorage.getItem('ip');
+let port = localStorage.getItem('port');
 
 export async function GetRangeListValue(bucket: string, key: string, start: any, end: any): Promise<any> {
   const Url = `http://${ip}:${port}`;
@@ -84,3 +84,10 @@ export function PackSetData(data: string[]): any {
   }
   return tmp;
 }
+
+export function clear() {
+  token = null;
+  ip = null;
+  port = null;
+}
+
