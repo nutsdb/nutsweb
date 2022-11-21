@@ -14,7 +14,8 @@ import VerticalTabs from '/src/comps/Tab';
 import Board from '../../comps/Board';
 import { Button, FormControlLabel, FormGroup, Switch, Tooltip } from '@mui/material';
 import LogoutIcon from '@mui/icons-material/Logout';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { clear } from '../../backend/GetDsData';
 
 const drawerWidth = 240;
 const textSize = {
@@ -56,14 +57,13 @@ export default class Index extends React.Component {
     });
   }
 
-
   render() {
     if (!Setting.isLoggedIn()) {
       // @ts-ignore
-      const history =this.props.history;
-      setTimeout(() => history.push('/'), 1500);
+
+      setTimeout(() => window.location.href='/', 1500);
       return <Alert severity='error' style={{ width: '300px', margin: 'auto' }}
-                    onClose={() => history.push('/')}>
+                    onClose={() => window.location.href='/'}>
         you are not logged in
       </Alert>;
     }
@@ -99,7 +99,7 @@ export default class Index extends React.Component {
             </Tooltip>
 
             <Link to="/">
-              <Button  sx={{mr:1}} variant='contained'  startIcon={<LogoutIcon />}>
+              <Button onClick={()=>{localStorage.clear();clear()}}  sx={{mr:1}} variant='contained'  startIcon={<LogoutIcon />}>
                 Logout
               </Button>
             </Link>
