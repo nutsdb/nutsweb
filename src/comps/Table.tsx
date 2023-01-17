@@ -18,10 +18,19 @@ import Tooltip from '@mui/material/Tooltip';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Switch from '@mui/material/Switch';
 import DeleteIcon from '@mui/icons-material/Delete';
+import AddCircleIcon from '@mui/icons-material/AddCircle';
 import { visuallyHidden } from '@mui/utils';
 import Message from './Message';
 import SearchIcon from '@mui/icons-material/Search';
-import { InputBase } from '@mui/material';
+import { Alert, Button, InputBase, Snackbar } from '@mui/material';
+import TextField from '@mui/material/TextField';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
+import EditIcon from '@mui/icons-material/Edit';
+import { AddSingleValue, UpdateSingleValue } from '../backend/StringOperation';
 
 interface Data {
   key: string;
@@ -172,8 +181,10 @@ function EnhancedTableHead(props: EnhancedTableProps) {
 
 interface EnhancedTableToolbarProps {
   numSelected: number;
+  ds: string;
+  selected: string[];
+  bucket: string;
 }
-
 
 
 function CustomizedInputBase(props: { prop: any; }) {
@@ -191,11 +202,11 @@ function CustomizedInputBase(props: { prop: any; }) {
         onChange={e => setKeyword(e.target.value)}
       />
       <IconButton type='button' sx={{ p: '10px' }} aria-label='search' onClick={() => {
-        let { rows, setRows,back} = props.prop;
+        let { rows, setRows, back } = props.prop;
         rows = rows as Data[];
-        if (keyword==''){
-          setRows(back)
-          return
+        if (keyword == '') {
+          setRows(back);
+          return;
         }
         let tmp: Data[] = [];
         for (let i = 0; i < rows.length; i++) {
@@ -214,63 +225,262 @@ function CustomizedInputBase(props: { prop: any; }) {
 
 
 const EnhancedTableToolbar = (props: EnhancedTableToolbarProps) => {
-  const { numSelected, ...other } = props;
+  // @ts-ignore
+  const { numSelected,rows,setRows,ds, selected, bucket, ...other } = props;
+  const [open, setOpen] = React.useState(false);
+  const [operateType, setOperateType] = React.useState('');
+  const [openAlert, setOpenAlert] = React.useState(false);
 
+  const [level, setLevel] = React.useState('');
+  const [message, setMessage] = React.useState('');
+
+
+  const [key, setKey] = React.useState('');
+  const [value, setValue] = React.useState('');
+  const [ttl, setTTL] = React.useState(0);
+
+  // @ts-ignore
+  const handleTextInputChange = (type: string, event) => {
+    switch (type) {
+      case 'key':
+        setKey(event.target.value);
+        break;
+      case 'value':
+        setValue(event.target.value);
+        break;
+      case 'ttl':
+        setTTL(event.target.value);
+        break;
+    }
+  };
+
+  const handleClickOpen = (type: string) => {
+    if (type == 'update' && numSelected != 1) {
+      setOpenAlert(true);
+      setMessage('Please select one item to update');
+      setLevel('error');
+      setTimeout(() => {
+        setOpenAlert(false);
+      }, 2000);
+      return;
+    }
+    setKey(selected[0]);
+    setOpen(true);
+    setOperateType(type);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
+  //@ts-ignore
+  const handleSubmit = (event) => {
+    let success =false;
+    event.preventDefault();
+    const form = {
+      key: key,
+      value: value,
+      ttl: ttl,
+    };
+    if (operateType == 'add') {
+      AddSingleValue(bucket, form.key, form.value, form.ttl).then((res) => {
+        if (res.data.code == 200) {
+          setOpenAlert(true);
+          setMessage('Add Success');
+          setLevel('success');
+          success = true;
+        } else {
+          setOpenAlert(true);
+          setMessage('Add Failed');
+          setLevel('error');
+        }
+      });
+    } else if (operateType == 'update') {
+      UpdateSingleValue(bucket, form.key, form.value, form.ttl).then((res) => {
+        if (res.data.code == 200) {
+          setOpenAlert(true);
+          setMessage('Update Success');
+          setLevel('success');
+          setTimeout(() => {
+            setOpenAlert(false);
+          }, 2000);
+          setOpen(false);
+          success = true;
+        } else {
+          setOpenAlert(true);
+          setMessage('Update Failed');
+          setLevel('error');
+        }
+      });
+    }
+    setTimeout(() => {
+      setOpenAlert(false);
+    }, 2000);
+
+    if(success){
+      //find key from rows and update
+      let tmp = rows as Data[];
+      let index = tmp.findIndex((item) => item.key == key);
+      if (index != -1) {
+        tmp[index].value = value;
+        tmp[index].length = value.length;
+      }else {
+        tmp.push({key:key,value:value,length:value.length});
+      }
+      setRows(tmp);
+      setTimeout(() => {
+        setOpenAlert(false);
+      }, 2000);
+      setOpen(false);
+    }
+    //reset
+    setKey('');
+    setValue('');
+    setTTL(0);
+    setOpen(false);//close dialog
+  };
+
+  // @ts-ignore
   return (
-    <Toolbar
-      sx={{
-        pl: { sm: 2 },
-        pr: { xs: 1, sm: 1 },
-        ...(numSelected > 0 && {
-          bgcolor: (theme) =>
-            alpha(theme.palette.primary.main, theme.palette.action.activatedOpacity),
-        }),
-      }}
-    >
+    <>
+      <Toolbar
+        sx={{
+          pl: { sm: 2 },
+          pr: { xs: 1, sm: 1 },
+          ...(numSelected > 0 && {
+            bgcolor: (theme) =>
+              alpha(theme.palette.primary.main, theme.palette.action.activatedOpacity),
+          }),
+        }}
+      >
 
-      {numSelected > 0 ? (
-        <Typography
-          sx={{ flex: '1 1 100%' }}
-          color='inherit'
-          variant='subtitle1'
-          component='div'
-        >
-          {numSelected} selected
-        </Typography>
-      ) : (
-        <Typography
-          sx={{ flex: '1 1 100%' }}
-          variant='h6'
-          id='tableTitle'
-          component='div'
-        >
-          Data List
+        {numSelected > 0 ? (
+          <Typography
+            sx={{ flex: '1 1 100%' }}
+            color='inherit'
+            variant='subtitle1'
+            component='div'
+          >
+            {numSelected} selected
+          </Typography>
+        ) : (
+          <Typography
+            sx={{ flex: '1 1 100%' }}
+            variant='h6'
+            id='tableTitle'
+            component='div'
+          >
+            Data List
 
-        </Typography>
-      )}
-      <CustomizedInputBase
-        //@ts-ignore
-        prop={other} />
-      {numSelected > 0 ? (
-        <Tooltip title='Delete'>
-          <IconButton>
-            <DeleteIcon />
-          </IconButton>
-        </Tooltip>
-      ) : (
-        <Tooltip title='Delete'>
-          <IconButton disabled={false}>
-            <DeleteIcon />
-          </IconButton>
-        </Tooltip>
-      )}
-    </Toolbar>
+          </Typography>
+        )}
+        <CustomizedInputBase
+          //@ts-ignore
+          prop={other} />
+        {numSelected == 0 ? (
+            <Tooltip title='Add'>
+              <IconButton onClick={() => {
+                handleClickOpen('add');
+              }}>
+                <AddCircleIcon />
+              </IconButton>
+            </Tooltip>)
+          : (
+            <Tooltip title='EditIcon'>
+              <IconButton onClick={() => {
+                handleClickOpen('update');
+              }}>
+                <EditIcon />
+              </IconButton>
+            </Tooltip>)
+        }
+
+        {numSelected > 0 ? (
+          <Tooltip title='Delete'>
+            <IconButton>
+              <DeleteIcon />
+            </IconButton>
+          </Tooltip>
+        ) : (
+          <Tooltip title='Delete'>
+            <IconButton disabled={true}>
+              <DeleteIcon />
+            </IconButton>
+          </Tooltip>
+        )}
+      </Toolbar>
+
+      <Dialog open={open} onClose={handleClose}>
+        <DialogTitle>{operateType.toUpperCase()}</DialogTitle>
+        <Box component='form' onSubmit={handleSubmit} noValidate>
+          <DialogContent>
+            <DialogContentText>
+              {operateType == 'add' ? 'Add a new key-value pair' : 'Update the selected key-value pair'}
+            </DialogContentText>
+            <TextField
+              autoFocus
+              margin='dense'
+              id='key'
+              label='KEY'
+              fullWidth
+              variant='standard'
+              value={operateType == 'add' ? null : selected[0]}
+              disabled={operateType == 'add' ? false : true}
+              onChange={(e) => {
+                handleTextInputChange('key', e);
+              }}
+            />
+            <TextField
+              autoFocus
+              margin='dense'
+              id='value'
+              required
+              label='VALUE'
+              fullWidth
+              variant='standard'
+              onChange={(e) => {
+                handleTextInputChange('value', e);
+              }}
+            />
+            <TextField
+              autoFocus
+              margin='dense'
+              id='ttl'
+              label='TTL'
+              type='number'
+              fullWidth
+              variant='standard'
+              onChange={(e) => {
+                handleTextInputChange('value', e);
+              }}
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleClose}>Cancel</Button>
+            <Button type='submit'>Subscribe</Button>
+          </DialogActions>
+        </Box>
+
+      </Dialog>
+
+
+      <Snackbar
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        open={openAlert}
+      >
+        <Alert onClose={() => {
+          setOpenAlert(false);
+        }}      // @ts-ignore
+               severity={level} sx={{ width: '100%' }}>
+          {message}
+        </Alert>
+      </Snackbar>
+    </>
   );
 };
 
 export default function EnhancedTable(props: any) {
 
-  const [rows, setRows] = React.useState<Data[]>([]);
+  let   [rows, setRows] = React.useState<Data[]>([]);
   const [back, setBack] = React.useState<Data[]>([]);
 
   const [order, setOrder] = React.useState<Order>('asc');
@@ -300,7 +510,7 @@ export default function EnhancedTable(props: any) {
       let ds = props.condition.ds;
       if (ds == 'string') {
         headCells[0].label = 'Key';
-      } else if (ds == 'list' || ds == 'set') {
+      } else if (ds == 'list' || ds == 'set' || ds == 'zset') {
         headCells[0].label = 'Preview';
       }
     }
@@ -355,13 +565,17 @@ export default function EnhancedTable(props: any) {
   const emptyRows =
     page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
 
+
   return (
     <>
       <Box sx={{ width: '100%' }}>
         <Paper sx={{ width: '100%', mb: 2 }}>
           <EnhancedTableToolbar
             //@ts-ignore
-            numSelected={selected.length} rows={rows} setRows={setRows} back={back} />
+            numSelected={selected.length} rows={rows} setRows={setRows} back={back} ds={props.condition.ds}
+            bucket={props.condition.bucket}
+            // @ts-ignore
+            selected={selected} />
           <TableContainer>
             <Table
               sx={{ minWidth: 750 }}
@@ -429,7 +643,7 @@ export default function EnhancedTable(props: any) {
                 {emptyRows > 0 && (
                   <TableRow
                     style={{
-                      height: (dense ? 33 : 53) * emptyRows,
+                      height: (dense ? 13 : 23) * emptyRows,
                     }}
                   >
                     <TableCell colSpan={6} />
