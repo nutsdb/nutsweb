@@ -30,6 +30,7 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import EditIcon from '@mui/icons-material/Edit';
+import { AddSingleValue, UpdateSingleValue } from '../backend/StringOperation';
 
 interface Data {
   key: string;
@@ -182,6 +183,7 @@ interface EnhancedTableToolbarProps {
   numSelected: number;
   ds: string;
   selected: string[];
+  bucket: string;
 }
 
 
@@ -223,17 +225,22 @@ function CustomizedInputBase(props: { prop: any; }) {
 
 
 const EnhancedTableToolbar = (props: EnhancedTableToolbarProps) => {
-  const { numSelected, ds, selected, ...other } = props;
+  // @ts-ignore
+  const { numSelected,rows,setRows,ds, selected, bucket, ...other } = props;
   const [open, setOpen] = React.useState(false);
   const [operateType, setOperateType] = React.useState('');
   const [openAlert, setOpenAlert] = React.useState(false);
+
+  const [level, setLevel] = React.useState('');
+  const [message, setMessage] = React.useState('');
+
 
   const [key, setKey] = React.useState('');
   const [value, setValue] = React.useState('');
   const [ttl, setTTL] = React.useState(0);
 
   // @ts-ignore
-  const handleTextInputChange = (type: string,event) => {
+  const handleTextInputChange = (type: string, event) => {
     switch (type) {
       case 'key':
         setKey(event.target.value);
@@ -250,8 +257,14 @@ const EnhancedTableToolbar = (props: EnhancedTableToolbarProps) => {
   const handleClickOpen = (type: string) => {
     if (type == 'update' && numSelected != 1) {
       setOpenAlert(true);
+      setMessage('Please select one item to update');
+      setLevel('error');
+      setTimeout(() => {
+        setOpenAlert(false);
+      }, 2000);
       return;
     }
+    setKey(selected[0]);
     setOpen(true);
     setOperateType(type);
   };
@@ -261,19 +274,63 @@ const EnhancedTableToolbar = (props: EnhancedTableToolbarProps) => {
   };
   //@ts-ignore
   const handleSubmit = (event) => {
+    let success =false;
     event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    console.log(data);
     const form = {
       key: key,
       value: value,
       ttl: ttl,
     };
     if (operateType == 'add') {
-
-
+      AddSingleValue(bucket, form.key, form.value, form.ttl).then((res) => {
+        if (res.data.code == 200) {
+          setOpenAlert(true);
+          setMessage('Add Success');
+          setLevel('success');
+          success = true;
+        } else {
+          setOpenAlert(true);
+          setMessage('Add Failed');
+          setLevel('error');
+        }
+      });
     } else if (operateType == 'update') {
+      UpdateSingleValue(bucket, form.key, form.value, form.ttl).then((res) => {
+        if (res.data.code == 200) {
+          setOpenAlert(true);
+          setMessage('Update Success');
+          setLevel('success');
+          setTimeout(() => {
+            setOpenAlert(false);
+          }, 2000);
+          setOpen(false);
+          success = true;
+        } else {
+          setOpenAlert(true);
+          setMessage('Update Failed');
+          setLevel('error');
+        }
+      });
+    }
+    setTimeout(() => {
+      setOpenAlert(false);
+    }, 2000);
 
+    if(success){
+      //find key from rows and update
+      let tmp = rows as Data[];
+      let index = tmp.findIndex((item) => item.key == key);
+      if (index != -1) {
+        tmp[index].value = value;
+        tmp[index].length = value.length;
+      }else {
+        tmp.push({key:key,value:value,length:value.length});
+      }
+      setRows(tmp);
+      setTimeout(() => {
+        setOpenAlert(false);
+      }, 2000);
+      setOpen(false);
     }
     //reset
     setKey('');
@@ -368,7 +425,9 @@ const EnhancedTableToolbar = (props: EnhancedTableToolbarProps) => {
               variant='standard'
               value={operateType == 'add' ? null : selected[0]}
               disabled={operateType == 'add' ? false : true}
-              onChange={(e)=>{handleTextInputChange('key',e)}}
+              onChange={(e) => {
+                handleTextInputChange('key', e);
+              }}
             />
             <TextField
               autoFocus
@@ -378,7 +437,9 @@ const EnhancedTableToolbar = (props: EnhancedTableToolbarProps) => {
               label='VALUE'
               fullWidth
               variant='standard'
-              onChange={(e)=>{handleTextInputChange('value',e)}}
+              onChange={(e) => {
+                handleTextInputChange('value', e);
+              }}
             />
             <TextField
               autoFocus
@@ -388,7 +449,9 @@ const EnhancedTableToolbar = (props: EnhancedTableToolbarProps) => {
               type='number'
               fullWidth
               variant='standard'
-              onChange={(e)=>{handleTextInputChange('value',e)}}
+              onChange={(e) => {
+                handleTextInputChange('value', e);
+              }}
             />
           </DialogContent>
           <DialogActions>
@@ -403,12 +466,12 @@ const EnhancedTableToolbar = (props: EnhancedTableToolbarProps) => {
       <Snackbar
         anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
         open={openAlert}
-        message=''
       >
         <Alert onClose={() => {
           setOpenAlert(false);
-        }} severity='error' sx={{ width: '100%' }}>
-          Please select one key to update
+        }}      // @ts-ignore
+               severity={level} sx={{ width: '100%' }}>
+          {message}
         </Alert>
       </Snackbar>
     </>
@@ -417,7 +480,7 @@ const EnhancedTableToolbar = (props: EnhancedTableToolbarProps) => {
 
 export default function EnhancedTable(props: any) {
 
-  const [rows, setRows] = React.useState<Data[]>([]);
+  let   [rows, setRows] = React.useState<Data[]>([]);
   const [back, setBack] = React.useState<Data[]>([]);
 
   const [order, setOrder] = React.useState<Order>('asc');
@@ -447,7 +510,7 @@ export default function EnhancedTable(props: any) {
       let ds = props.condition.ds;
       if (ds == 'string') {
         headCells[0].label = 'Key';
-      } else if (ds == 'list' || ds == 'set') {
+      } else if (ds == 'list' || ds == 'set' || ds == 'zset') {
         headCells[0].label = 'Preview';
       }
     }
@@ -510,6 +573,7 @@ export default function EnhancedTable(props: any) {
           <EnhancedTableToolbar
             //@ts-ignore
             numSelected={selected.length} rows={rows} setRows={setRows} back={back} ds={props.condition.ds}
+            bucket={props.condition.bucket}
             // @ts-ignore
             selected={selected} />
           <TableContainer>
@@ -579,7 +643,7 @@ export default function EnhancedTable(props: any) {
                 {emptyRows > 0 && (
                   <TableRow
                     style={{
-                      height: (dense ? 33 : 53) * emptyRows,
+                      height: (dense ? 13 : 23) * emptyRows,
                     }}
                   >
                     <TableCell colSpan={6} />
